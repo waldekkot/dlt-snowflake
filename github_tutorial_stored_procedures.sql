@@ -30,6 +30,7 @@ def main(session):
     - Fetches issues from GitHub API
     - Loads them into Snowflake using dlt
     """
+    import dlt
     import json
     import requests
     from dlt_snowpark import DltSnowparkLoader
@@ -42,7 +43,7 @@ def main(session):
     response.raise_for_status()
     issues_data = response.json()
 
-    @loader.resource(name="issues", write_disposition="replace")
+    @dlt.resource(name="issues", write_disposition="replace")
     def get_issues():
         # Flatten complex nested objects for better table structure
         flattened = []
@@ -92,6 +93,7 @@ def main(session):
     Demonstrates idempotent loading - run multiple times,
     table always contains exactly one copy of the data.
     """
+    import dlt
     import json
     import requests
     from dlt_snowpark import DltSnowparkLoader
@@ -109,7 +111,7 @@ def main(session):
     response.raise_for_status()
     issues_data = response.json()
 
-    @loader.resource(name="closed_issues", write_disposition="replace")
+    @dlt.resource(name="closed_issues", write_disposition="replace")
     def get_closed_issues():
         flattened = []
         for issue in issues_data:
@@ -155,13 +157,14 @@ def main(session):
     Uses dlt.sources.helpers.rest_client.paginate() to handle
     GitHub API pagination automatically.
     """
+    import dlt
     import json
     from dlt_snowpark import DltSnowparkLoader
     from dlt.sources.helpers.rest_client import paginate
 
     loader = DltSnowparkLoader(session, pipeline_name="github_issues_paginated")
 
-    @loader.resource(name="issues_paginated", write_disposition="replace")
+    @dlt.resource(name="issues_paginated", write_disposition="replace")
     def get_issues():
         """Fetch issues with automatic pagination"""
         page_count = 0
@@ -225,6 +228,7 @@ def main(session):
     Loads both issues and comments in a single pipeline run,
     similar to the @dlt.source pattern in the tutorial.
     """
+    import dlt
     import json
     import requests
     from dlt_snowpark import DltSnowparkLoader
@@ -247,7 +251,7 @@ def main(session):
     comments_response.raise_for_status()
     comments_data = comments_response.json()
 
-    @loader.resource(name="gh_issues", write_disposition="replace")
+    @dlt.resource(name="gh_issues", write_disposition="replace")
     def get_issues():
         flattened = []
         for issue in issues_data:
@@ -264,7 +268,7 @@ def main(session):
             flattened.append(flat_issue)
         yield flattened
 
-    @loader.resource(name="gh_comments", write_disposition="replace")
+    @dlt.resource(name="gh_comments", write_disposition="replace")
     def get_comments():
         flattened = []
         for comment in comments_data:
@@ -423,6 +427,7 @@ def main(session, repo_name: str):
     Args:
         repo_name: GitHub repo in format "owner/repo" (default: "dlt-hub/dlt")
     """
+    import dlt
     import json
     import requests
     from dlt_snowpark import DltSnowparkLoader
@@ -444,7 +449,7 @@ def main(session, repo_name: str):
     issues_response.raise_for_status()
     issues_data = issues_response.json()
 
-    @loader.resource(name="cfg_repo_info", write_disposition="replace")
+    @dlt.resource(name="cfg_repo_info", write_disposition="replace")
     def get_repo_info():
         yield [{
             "id": repo_data.get("id"),
@@ -460,7 +465,7 @@ def main(session, repo_name: str):
             "html_url": repo_data.get("html_url"),
         }]
 
-    @loader.resource(name="cfg_issues", write_disposition="replace")
+    @dlt.resource(name="cfg_issues", write_disposition="replace")
     def get_issues():
         flattened = []
         for issue in issues_data:

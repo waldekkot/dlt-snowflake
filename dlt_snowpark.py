@@ -14,11 +14,12 @@ SETUP:
        IMPORTS = ('@my_stage/dlt_snowpark.py')
 
 USAGE:
+    import dlt
     from dlt_snowpark import DltSnowparkLoader
 
     loader = DltSnowparkLoader(session, pipeline_name="my_pipeline")
 
-    @loader.resource(name="my_table")
+    @dlt.resource(name="my_table", write_disposition="replace")
     def my_data():
         yield [{"id": 1, "name": "test"}]
 
@@ -80,11 +81,12 @@ class DltSnowparkLoader:
 
     Example:
         def my_stored_procedure(session):
+            import dlt
             from dlt_snowpark import DltSnowparkLoader
 
             loader = DltSnowparkLoader(session, pipeline_name="customer_pipeline")
 
-            @loader.resource(name="customers", write_disposition="replace")
+            @dlt.resource(name="customers", write_disposition="replace")
             def get_customers():
                 # Your data fetching logic here
                 yield [
@@ -241,28 +243,6 @@ class DltSnowparkLoader:
                 errors.append(f"{table_name}: {e!s}")
 
         return snowpark_destination
-
-    def resource(self, name: str, write_disposition: str = "replace", **kwargs):
-        """
-        Decorator to create a dlt resource.
-
-        This is a convenience wrapper around @dlt.resource that provides
-        sensible defaults for use with this loader.
-
-        Args:
-            name: Name of the destination table
-            write_disposition: "replace" (default) or "append"
-            **kwargs: Additional arguments passed to dlt.resource
-
-        Returns:
-            dlt.resource decorator
-
-        Example:
-            @loader.resource(name="users", write_disposition="replace")
-            def get_users():
-                yield [{"id": 1, "name": "Alice"}]
-        """
-        return dlt.resource(name=name, write_disposition=write_disposition, **kwargs)
 
     def run(self, *resources) -> dict[str, Any]:
         """
