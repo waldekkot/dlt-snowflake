@@ -125,13 +125,13 @@ CALL DLT_SNOWPARK_SFRT.MY_SCHEMA.P_MY_PIPELINE();
 
 ## Simple Demo Examples
 
-The Simple Demo (`simple_demo_stored_procedures.sql`) provides basic examples that demonstrate core dlt patterns without requiring external API access.
+The Simple Demo (`examples/simple_demo_stored_procedures.sql`) provides basic examples that demonstrate core dlt patterns without requiring external API access.
 
 ### Deploy Procedures
 
 ```bash
 snow sql -c dlt-demo -q "CREATE SCHEMA IF NOT EXISTS DLT_SNOWPARK_SFRT.SIMPLE_DEMO;"
-snow sql -c dlt-demo -f simple_demo_stored_procedures.sql
+snow sql -c dlt-demo -f examples/simple_demo_stored_procedures.sql
 ```
 
 ### Run and Validate
@@ -175,13 +175,13 @@ CALL DLT_SNOWPARK_SFRT.SIMPLE_DEMO.P_GENERATOR_PATTERN();
 
 ## Complex Demo Examples
 
-The Complex Demo (`complex_stored_procedures.sql`) provides validation pipelines with large datasets (2000+ rows each) and complex real-world ETL patterns.
+The Complex Demo (`examples/complex_stored_procedures.sql`) provides validation pipelines with large datasets (2000+ rows each) and complex real-world ETL patterns.
 
 ### Deploy Procedures
 
 ```bash
 snow sql -c dlt-demo -q "CREATE SCHEMA IF NOT EXISTS DLT_SNOWPARK_SFRT.COMPLEX_DEMO;"
-snow sql -c dlt-demo -f complex_stored_procedures.sql
+snow sql -c dlt-demo -f examples/complex_stored_procedures.sql
 ```
 
 ### Run and Validate
@@ -234,7 +234,7 @@ CALL DLT_SNOWPARK_SFRT.COMPLEX_DEMO.P_ECOMMERCE_ANALYTICS();
 
 ## GitHub Tutorial Example
 
-The GitHub tutorial (`github_tutorial_stored_procedures.sql`) implements the [dlt Tutorial - Load Data from an API](https://dlthub.com/docs/tutorial/load-data-from-an-api) inside Snowflake.
+The GitHub tutorial (`examples/github_tutorial_stored_procedures.sql`) implements the [dlt Tutorial - Load Data from an API](https://dlthub.com/docs/tutorial/load-data-from-an-api) inside Snowflake.
 
 ### Setup External API Access
 
@@ -258,7 +258,7 @@ CREATE OR REPLACE EXTERNAL ACCESS INTEGRATION GITHUB_API_ACCESS_INTEGRATION
 ### Deploy Procedures
 
 ```bash
-snow sql -c dlt-demo -f github_tutorial_stored_procedures.sql
+snow sql -c dlt-demo -f examples/github_tutorial_stored_procedures.sql
 ```
 
 ### Run and Validate
@@ -300,7 +300,7 @@ CALL DLT_SNOWPARK_SFRT.GITHUB_TUTORIAL.P_GITHUB_CONFIGURABLE('snowflakedb/snowpa
 
 ## Transformers Tutorial Example
 
-The Transformers tutorial (`transformers_tutorial_stored_procedures.sql`) implements the [dlt Transformers Example](https://github.com/dlt-hub/dlt/tree/master/docs/examples/transformers) inside Snowflake, demonstrating advanced dlt patterns using the PokeAPI.
+The Transformers tutorial (`examples/transformers_tutorial_stored_procedures.sql`) implements the [dlt Transformers Example](https://github.com/dlt-hub/dlt/tree/master/docs/examples/transformers) inside Snowflake, demonstrating advanced dlt patterns using the PokeAPI.
 
 ### Setup External API Access
 
@@ -324,7 +324,7 @@ CREATE OR REPLACE EXTERNAL ACCESS INTEGRATION POKEAPI_ACCESS_INTEGRATION
 ### Deploy Procedures
 
 ```bash
-snow sql -c dlt-demo -f transformers_tutorial_stored_procedures.sql
+snow sql -c dlt-demo -f examples/transformers_tutorial_stored_procedures.sql
 ```
 
 ### Run and Validate
@@ -376,7 +376,7 @@ CALL DLT_SNOWPARK_SFRT.TRANSFORMERS_TUTORIAL.P_POKEMON_ADD_MAP_PATTERN();
 
 ## Chess Production Example
 
-The Chess Production tutorial (`chess_production_stored_procedures.sql`) implements the [dlt Chess Production Example](https://dlthub.com/docs/examples/chess_production) inside Snowflake, demonstrating production-grade dlt patterns using the Chess.com API.
+The Chess Production tutorial (`examples/chess_production_stored_procedures.sql`) implements the [dlt Chess Production Example](https://dlthub.com/docs/examples/chess_production) inside Snowflake, demonstrating production-grade dlt patterns using the Chess.com API.
 
 ### Setup External API Access
 
@@ -400,7 +400,7 @@ CREATE OR REPLACE EXTERNAL ACCESS INTEGRATION CHESS_API_ACCESS_INTEGRATION
 ### Deploy Procedures
 
 ```bash
-snow sql -c dlt-demo -f chess_production_stored_procedures.sql
+snow sql -c dlt-demo -f examples/chess_production_stored_procedures.sql
 ```
 
 ### Run and Validate
@@ -677,19 +677,19 @@ CREATE STAGE IF NOT EXISTS DLT_SNOWPARK_SFRT.DLT_SNOWPARK.MODULES;
 snow stage copy dlt_snowpark.py @DLT_SNOWPARK_SFRT.DLT_SNOWPARK.MODULES/ -c dlt-demo --overwrite
 
 # Deploy Simple Demo procedures (no external API needed)
-snow sql -c dlt-demo -f simple_demo_stored_procedures.sql
+snow sql -c dlt-demo -f examples/simple_demo_stored_procedures.sql
 
 # Deploy Complex Demo procedures (large datasets)
-snow sql -c dlt-demo -f complex_stored_procedures.sql
+snow sql -c dlt-demo -f examples/complex_stored_procedures.sql
 
 # Deploy GitHub tutorial procedures
-snow sql -c dlt-demo -f github_tutorial_stored_procedures.sql
+snow sql -c dlt-demo -f examples/github_tutorial_stored_procedures.sql
 
 # Deploy Transformers tutorial procedures
-snow sql -c dlt-demo -f transformers_tutorial_stored_procedures.sql
+snow sql -c dlt-demo -f examples/transformers_tutorial_stored_procedures.sql
 
 # Deploy Chess Production tutorial procedures
-snow sql -c dlt-demo -f chess_production_stored_procedures.sql
+snow sql -c dlt-demo -f examples/chess_production_stored_procedures.sql
 
 # Run a procedure
 snow sql -c dlt-demo -q "CALL DLT_SNOWPARK_SFRT.SIMPLE_DEMO.P_BASIC_DATA_LOAD();"
@@ -704,11 +704,11 @@ When updating `dlt_snowpark.py`:
 snow stage copy dlt_snowpark.py @DLT_SNOWPARK_SFRT.DLT_SNOWPARK.MODULES/ -c dlt-demo --overwrite
 
 # Re-create stored procedures (they cache imports)
-snow sql -c dlt-demo -f simple_demo_stored_procedures.sql
-snow sql -c dlt-demo -f complex_stored_procedures.sql
-snow sql -c dlt-demo -f github_tutorial_stored_procedures.sql
-snow sql -c dlt-demo -f transformers_tutorial_stored_procedures.sql
-snow sql -c dlt-demo -f chess_production_stored_procedures.sql
+snow sql -c dlt-demo -f examples/simple_demo_stored_procedures.sql
+snow sql -c dlt-demo -f examples/complex_stored_procedures.sql
+snow sql -c dlt-demo -f examples/github_tutorial_stored_procedures.sql
+snow sql -c dlt-demo -f examples/transformers_tutorial_stored_procedures.sql
+snow sql -c dlt-demo -f examples/chess_production_stored_procedures.sql
 
 # Test
 snow sql -c dlt-demo -q "CALL DLT_SNOWPARK_SFRT.SIMPLE_DEMO.P_BASIC_DATA_LOAD();"
@@ -720,17 +720,32 @@ snow sql -c dlt-demo -q "CALL DLT_SNOWPARK_SFRT.CHESS_PRODUCTION.P_CHESS_PLAYERS
 
 ---
 
-## Files
+## Project Structure
+
+```
+dlt-snowflake/
+├── dlt_snowpark.py                    # Main helper module - upload to stage
+├── sfrt_stored_procedures.sql         # SFRT schema procedure
+├── docs/
+│   └── dlt-in-snowpark.md             # This documentation
+└── examples/
+    ├── simple_demo_stored_procedures.sql      # 7 simple demo procedures
+    ├── complex_stored_procedures.sql          # 6 complex validation pipelines
+    ├── github_tutorial_stored_procedures.sql  # 6 GitHub API tutorial procedures
+    ├── transformers_tutorial_stored_procedures.sql  # 6 Pokemon transformers
+    └── chess_production_stored_procedures.sql # 6 Chess.com production pipeline
+```
 
 | File | Description |
 |------|-------------|
 | `dlt_snowpark.py` | Reusable helper module - upload to stage |
-| `simple_demo_stored_procedures.sql` | 7 simple demo procedures (no external API) |
-| `complex_stored_procedures.sql` | 6 complex validation pipelines (~50K rows) |
-| `github_tutorial_stored_procedures.sql` | 6 GitHub API tutorial procedures |
-| `transformers_tutorial_stored_procedures.sql` | 6 Pokemon transformers tutorial procedures |
-| `chess_production_stored_procedures.sql` | 6 Chess.com production pipeline procedures |
-| `dlt-in-snowpark.md` | This documentation |
+| `sfrt_stored_procedures.sql` | Basic SFRT schema example procedure |
+| `examples/simple_demo_stored_procedures.sql` | 7 simple demo procedures (no external API) |
+| `examples/complex_stored_procedures.sql` | 6 complex validation pipelines (~50K rows) |
+| `examples/github_tutorial_stored_procedures.sql` | 6 GitHub API tutorial procedures |
+| `examples/transformers_tutorial_stored_procedures.sql` | 6 Pokemon transformers tutorial procedures |
+| `examples/chess_production_stored_procedures.sql` | 6 Chess.com production pipeline procedures |
+| `docs/dlt-in-snowpark.md` | This documentation |
 
 ---
 
