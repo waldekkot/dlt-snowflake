@@ -87,13 +87,8 @@ For detailed documentation, see: [`docs/dlt-in-snowpark.md`](./docs/dlt-in-snowp
 
 ## 🛠️ How It Was Built
 
-This code was generated primarily using **Claude Code**, with human guidance to connect the dots and produce a working, pleasant-to-use solution.
+This code was generated primarily using **Claude Code**, with human guidance to connect the dots (in dlt and Snowflake) and produce a working, pleasant-to-use solution.
 
----
-
-## 📄 License
-
-MIT
 
 ---
 
