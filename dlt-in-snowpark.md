@@ -16,7 +16,7 @@ A reusable helper module (`dlt_snowpark.py`) is provided that encapsulates this 
 |---------|---------|
 | **PUT command blocked** | Snowflake SPs cannot execute `PUT` command (used by dlt internally) |
 | **Pandas NOT needed** | Snowpark's `create_dataframe()` accepts lists of dicts directly |
-| **External APIs work** | With EXTERNAL_ACCESS_INTEGRATIONS, SPs can call external APIs (GitHub, PokeAPI) |
+| **External APIs work** | With EXTERNAL_ACCESS_INTEGRATIONS, SPs can call external APIs (GitHub, PokeAPI, Chess.com) |
 | **Full ETL support** | Read from Snowflake → Transform → Write back to Snowflake |
 | **dlt patterns work** | Transformers, parallel fetch, dynamic resources, add_map all validated |
 
@@ -40,10 +40,14 @@ DLT_SNOWPARK_SFRT/                    # Database
 │   ├── Stored Procedures (6)
 │   ├── Tables (10)
 │   └── Network Rule + EAI (api.github.com)
-└── TRANSFORMERS_TUTORIAL/            # Schema: Pokemon transformers tutorial
+├── TRANSFORMERS_TUTORIAL/            # Schema: Pokemon transformers tutorial
+│   ├── Stored Procedures (6)
+│   ├── Tables (6)
+│   └── Network Rule + EAI (pokeapi.co)
+└── CHESS_PRODUCTION/                 # Schema: Chess.com production pipeline
     ├── Stored Procedures (6)
     ├── Tables (6)
-    └── Network Rule + EAI (pokeapi.co)
+    └── Network Rule + EAI (api.chess.com)
 ```
 
 | Schema | Purpose |
@@ -53,6 +57,7 @@ DLT_SNOWPARK_SFRT/                    # Database
 | `COMPLEX_DEMO` | Complex validation pipelines with large datasets |
 | `GITHUB_TUTORIAL` | GitHub API tutorial procedures and data |
 | `TRANSFORMERS_TUTORIAL` | Pokemon transformers tutorial procedures and data |
+| `CHESS_PRODUCTION` | Chess.com production pipeline tutorial |
 
 ---
 
@@ -368,6 +373,83 @@ CALL DLT_SNOWPARK_SFRT.TRANSFORMERS_TUTORIAL.P_POKEMON_ADD_MAP_PATTERN();
 
 ---
 
+## Chess Production Example
+
+The Chess Production tutorial (`chess_production_stored_procedures.sql`) implements the [dlt Chess Production Example](https://dlthub.com/docs/examples/chess_production) inside Snowflake, demonstrating production-grade dlt patterns using the Chess.com API.
+
+### Setup External API Access
+
+```sql
+-- Create schema for tutorial
+CREATE SCHEMA IF NOT EXISTS DLT_SNOWPARK_SFRT.CHESS_PRODUCTION;
+
+-- Network rule for Chess.com API
+CREATE OR REPLACE NETWORK RULE DLT_SNOWPARK_SFRT.CHESS_PRODUCTION.CHESS_API_NETWORK_RULE
+  MODE = EGRESS
+  TYPE = HOST_PORT
+  VALUE_LIST = ('api.chess.com:443');
+
+-- External access integration
+CREATE OR REPLACE EXTERNAL ACCESS INTEGRATION CHESS_API_ACCESS_INTEGRATION
+  ALLOWED_NETWORK_RULES = (DLT_SNOWPARK_SFRT.CHESS_PRODUCTION.CHESS_API_NETWORK_RULE)
+  ENABLED = TRUE
+  COMMENT = 'Allows stored procedures to access Chess.com API';
+```
+
+### Deploy Procedures
+
+```bash
+snow sql -c dlt-demo -f chess_production_stored_procedures.sql
+```
+
+### Run and Validate
+
+```sql
+-- Basic players list
+CALL DLT_SNOWPARK_SFRT.CHESS_PRODUCTION.P_CHESS_PLAYERS_BASIC('GM', 5);
+
+-- Player profiles with parallel fetching
+CALL DLT_SNOWPARK_SFRT.CHESS_PRODUCTION.P_CHESS_PLAYERS_PROFILES('GM', 5);
+
+-- Player games for a specific month
+CALL DLT_SNOWPARK_SFRT.CHESS_PRODUCTION.P_CHESS_PLAYERS_GAMES('GM', 3, 2024, 12);
+
+-- Full production pipeline (players + profiles + games)
+CALL DLT_SNOWPARK_SFRT.CHESS_PRODUCTION.P_CHESS_FULL_PIPELINE('GM', 5, 2024, 12);
+
+-- Multi-title players (GM, IM, FM, WGM)
+CALL DLT_SNOWPARK_SFRT.CHESS_PRODUCTION.P_CHESS_MULTI_TITLE(3);
+
+-- Player statistics with ratings
+CALL DLT_SNOWPARK_SFRT.CHESS_PRODUCTION.P_CHESS_STATS('GM', 5);
+```
+
+### Chess Production Results
+
+| Procedure | dlt Pattern | Tables | Rows |
+|-----------|-------------|--------|------|
+| `P_CHESS_PLAYERS_BASIC` | Basic API fetch | PLAYERS | 5 |
+| `P_CHESS_PLAYERS_PROFILES` | Parallel transformer | PLAYERS_PROFILES | 5 |
+| `P_CHESS_PLAYERS_GAMES` | Transformer pattern | PLAYERS_GAMES | 100+ |
+| `P_CHESS_FULL_PIPELINE` | Multi-resource pipeline | PLAYERS, PLAYERS_PROFILES, PLAYERS_GAMES | 200+ |
+| `P_CHESS_MULTI_TITLE` | Dynamic resources | TITLED_PLAYERS, TITLED_PROFILES | 20+ |
+| `P_CHESS_STATS` | Parallel transformer | PLAYER_STATS | 5 |
+
+**Total: 300+ rows across 6+ tables**
+
+### Key dlt Production Patterns Demonstrated
+
+| Pattern | Description | Procedure |
+|---------|-------------|-----------|
+| **Base Resource** | Fetch list of items to process | `P_CHESS_PLAYERS_BASIC` |
+| **Parallel Transformers** | Use ThreadPoolExecutor for concurrent API calls | `P_CHESS_PLAYERS_PROFILES` |
+| **Chained Transformers** | Process games for each player | `P_CHESS_PLAYERS_GAMES` |
+| **Multi-Resource Pipeline** | Load multiple tables in single pipeline run | `P_CHESS_FULL_PIPELINE` |
+| **Dynamic Resources** | Create resources for multiple categories | `P_CHESS_MULTI_TITLE` |
+| **Nested Stats Extraction** | Flatten complex API responses | `P_CHESS_STATS` |
+
+---
+
 ## Why This Approach?
 
 ### The Problem
@@ -599,6 +681,9 @@ snow sql -c dlt-demo -f github_tutorial_stored_procedures.sql
 # Deploy Transformers tutorial procedures
 snow sql -c dlt-demo -f transformers_tutorial_stored_procedures.sql
 
+# Deploy Chess Production tutorial procedures
+snow sql -c dlt-demo -f chess_production_stored_procedures.sql
+
 # Run a procedure
 snow sql -c dlt-demo -q "CALL DLT_SNOWPARK_SFRT.SIMPLE_DEMO.P_BASIC_DATA_LOAD();"
 ```
@@ -616,12 +701,14 @@ snow sql -c dlt-demo -f simple_demo_stored_procedures.sql
 snow sql -c dlt-demo -f complex_stored_procedures.sql
 snow sql -c dlt-demo -f github_tutorial_stored_procedures.sql
 snow sql -c dlt-demo -f transformers_tutorial_stored_procedures.sql
+snow sql -c dlt-demo -f chess_production_stored_procedures.sql
 
 # Test
 snow sql -c dlt-demo -q "CALL DLT_SNOWPARK_SFRT.SIMPLE_DEMO.P_BASIC_DATA_LOAD();"
 snow sql -c dlt-demo -q "CALL DLT_SNOWPARK_SFRT.COMPLEX_DEMO.P_DATA_QUALITY_PIPELINE();"
 snow sql -c dlt-demo -q "CALL DLT_SNOWPARK_SFRT.GITHUB_TUTORIAL.P_GITHUB_ISSUES_BASIC();"
 snow sql -c dlt-demo -q "CALL DLT_SNOWPARK_SFRT.TRANSFORMERS_TUTORIAL.P_POKEMON_LIST_BASIC();"
+snow sql -c dlt-demo -q "CALL DLT_SNOWPARK_SFRT.CHESS_PRODUCTION.P_CHESS_PLAYERS_BASIC();"
 ```
 
 ---
@@ -635,6 +722,7 @@ snow sql -c dlt-demo -q "CALL DLT_SNOWPARK_SFRT.TRANSFORMERS_TUTORIAL.P_POKEMON_
 | `complex_stored_procedures.sql` | 6 complex validation pipelines (~50K rows) |
 | `github_tutorial_stored_procedures.sql` | 6 GitHub API tutorial procedures |
 | `transformers_tutorial_stored_procedures.sql` | 6 Pokemon transformers tutorial procedures |
+| `chess_production_stored_procedures.sql` | 6 Chess.com production pipeline procedures |
 | `dlt-in-snowpark.md` | This documentation |
 
 ---
@@ -694,7 +782,7 @@ else:
 3. **Snowpark's `save_as_table()`** is the way to write data from within stored procedures
 4. **No pandas needed** — Snowpark's `create_dataframe()` accepts list of dicts directly
 5. **All dlt ETL features** (sources, resources, transformations) still work
-6. **External APIs work** — Use EXTERNAL_ACCESS_INTEGRATIONS for GitHub, PokeAPI, etc.
+6. **External APIs work** — Use EXTERNAL_ACCESS_INTEGRATIONS for GitHub, PokeAPI, Chess.com, etc.
 7. **dlt's `paginate()` works** — REST client helpers function correctly inside SPs
 8. **Minimal code overhead** — Only ~2 extra lines compared to native dlt
 
@@ -706,6 +794,7 @@ else:
 - [dlt Documentation](https://dlthub.com/docs/intro)
 - [dlt Tutorial - Load Data from an API](https://dlthub.com/docs/tutorial/load-data-from-an-api)
 - [dlt Transformers Example](https://github.com/dlt-hub/dlt/tree/master/docs/examples/transformers)
+- [dlt Chess Production Example](https://dlthub.com/docs/examples/chess_production)
 - [dlt Custom Destinations](https://dlthub.com/docs/dlt-ecosystem/destinations/destination)
 - [dlt REST Client Helpers](https://dlthub.com/docs/general-usage/http/rest-client)
 
