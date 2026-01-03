@@ -23,6 +23,7 @@ def main(session):
     
     Loads a simple list of items into Snowflake using dlt patterns.
     """
+    import dlt
     import json
     from dlt_snowpark import DltSnowparkLoader
     
@@ -35,7 +36,7 @@ def main(session):
         {"id": 3, "name": "Test Item 3", "created_at": "2026-01-03T12:00:00Z"}
     ]
     
-    @loader.resource(name="test_items", write_disposition="replace")
+    @dlt.resource(name="test_items", write_disposition="replace")
     def get_test_items():
         yield test_data
     
@@ -70,12 +71,13 @@ def main(session):
     Shows how to load multiple related tables (customers and orders) 
     in a single pipeline run.
     """
+    import dlt
     import json
     from dlt_snowpark import DltSnowparkLoader
     
     loader = DltSnowparkLoader(session, pipeline_name="multi_table_demo")
     
-    @loader.resource(name="customers", write_disposition="replace")
+    @dlt.resource(name="customers", write_disposition="replace")
     def get_customers():
         yield [
             {"id": 1, "name": "Alice Johnson", "email": "alice@example.com"},
@@ -83,7 +85,7 @@ def main(session):
             {"id": 3, "name": "Charlie Brown", "email": "charlie@example.com"}
         ]
     
-    @loader.resource(name="orders", write_disposition="replace")
+    @dlt.resource(name="orders", write_disposition="replace")
     def get_orders():
         yield [
             {"order_id": 1001, "customer_id": 1, "amount": 99.99, "status": "shipped"},
@@ -126,13 +128,14 @@ def main(session):
     Shows how to handle complex nested JSON data with dlt.
     The loader flattens nested structures for storage.
     """
+    import dlt
     import json
     from datetime import datetime
     from dlt_snowpark import DltSnowparkLoader
 
     loader = DltSnowparkLoader(session, pipeline_name="nested_json_demo")
 
-    @loader.resource(name="ecommerce_orders", write_disposition="replace")
+    @dlt.resource(name="ecommerce_orders", write_disposition="replace")
     def get_orders():
         yield [
             {
@@ -198,6 +201,7 @@ def main(session):
     Shows how to use append write disposition to add data without
     replacing existing records. Each call adds more log entries.
     """
+    import dlt
     import json
     from datetime import datetime
     from dlt_snowpark import DltSnowparkLoader
@@ -207,7 +211,7 @@ def main(session):
     # Generate a unique batch of log entries
     timestamp = datetime.now().isoformat()
     
-    @loader.resource(name="event_log", write_disposition="append")
+    @dlt.resource(name="event_log", write_disposition="append")
     def get_events():
         yield [
             {"event_id": f"evt_{timestamp}_1", "event_type": "page_view", "user_id": 101, "timestamp": timestamp},
@@ -247,12 +251,13 @@ def main(session):
     Shows how to use Python generators for memory-efficient loading
     of larger datasets. dlt processes data in batches.
     """
+    import dlt
     import json
     from dlt_snowpark import DltSnowparkLoader
     
     loader = DltSnowparkLoader(session, pipeline_name="generator_demo")
     
-    @loader.resource(name="generated_numbers", write_disposition="replace")
+    @dlt.resource(name="generated_numbers", write_disposition="replace")
     def generate_numbers():
         # Yield data in batches for memory efficiency
         batch_size = 100

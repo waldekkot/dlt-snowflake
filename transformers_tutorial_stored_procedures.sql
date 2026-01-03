@@ -29,6 +29,7 @@ def main(session):
     Fetches the first page of Pokemon from PokeAPI.
     This is the foundation before using transformers.
     """
+    import dlt
     import json
     import requests
     from dlt_snowpark import DltSnowparkLoader
@@ -40,7 +41,7 @@ def main(session):
     response.raise_for_status()
     pokemon_list = response.json()["results"]
 
-    @loader.resource(name="pokemon_list", write_disposition="replace")
+    @dlt.resource(name="pokemon_list", write_disposition="replace")
     def get_pokemon_list():
         """Yields the list of Pokemon with basic info"""
         processed = []
@@ -83,6 +84,7 @@ def main(session):
 
     Equivalent to: pokemon_list | pokemon (from the dlt example)
     """
+    import dlt
     import json
     import requests
     from dlt_snowpark import DltSnowparkLoader
@@ -100,7 +102,7 @@ def main(session):
         response.raise_for_status()
         return response.json()
 
-    @loader.resource(name="pokemon", write_disposition="replace")
+    @dlt.resource(name="pokemon", write_disposition="replace")
     def pokemon_transformer():
         """
         Transformer that yields Pokemon details.
@@ -177,6 +179,7 @@ def main(session):
 
     Note: dlt is smart enough to fetch pokemon_list and pokemon details only once!
     """
+    import dlt
     import json
     import requests
     from dlt_snowpark import DltSnowparkLoader
@@ -218,7 +221,7 @@ def main(session):
     # ============================================================
     # Resource 1: Pokemon Details (from pokemon_list | pokemon)
     # ============================================================
-    @loader.resource(name="pokemon", write_disposition="replace")
+    @dlt.resource(name="pokemon", write_disposition="replace")
     def get_pokemon():
         """Yields flattened Pokemon details"""
         flattened = []
@@ -245,7 +248,7 @@ def main(session):
     # ============================================================
     # Resource 2: Species Details (from pokemon_list | pokemon | species)
     # ============================================================
-    @loader.resource(name="species", write_disposition="replace")
+    @dlt.resource(name="species", write_disposition="replace")
     def get_species():
         """
         Yields species details linked to Pokemon.
@@ -340,6 +343,7 @@ def main(session):
 
     Here we use ThreadPoolExecutor for parallel HTTP calls.
     """
+    import dlt
     import json
     import requests
     from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -376,7 +380,7 @@ def main(session):
     # Sort by ID to maintain consistent order
     pokemon_details_list.sort(key=lambda x: x.get("id", 0))
 
-    @loader.resource(name="pokemon_parallel", write_disposition="replace")
+    @dlt.resource(name="pokemon_parallel", write_disposition="replace")
     def get_pokemon():
         """Yields Pokemon details fetched in parallel"""
         flattened = []
@@ -431,6 +435,7 @@ def main(session):
 
     Each endpoint has its own transformer logic.
     """
+    import dlt
     import json
     import requests
     from dlt_snowpark import DltSnowparkLoader
@@ -534,15 +539,15 @@ def main(session):
         all_data[endpoint["name"]] = [flattener(d) for d in details_list]
 
     # Create resources
-    @loader.resource(name="poke_types", write_disposition="replace")
+    @dlt.resource(name="poke_types", write_disposition="replace")
     def get_types():
         yield all_data["types"]
 
-    @loader.resource(name="poke_abilities", write_disposition="replace")
+    @dlt.resource(name="poke_abilities", write_disposition="replace")
     def get_abilities():
         yield all_data["abilities"]
 
-    @loader.resource(name="poke_berries", write_disposition="replace")
+    @dlt.resource(name="poke_berries", write_disposition="replace")
     def get_berries():
         yield all_data["berries"]
 
@@ -584,6 +589,7 @@ def main(session):
     1. Fetch Pokemon
     2. Apply transformations: calculate BMI, categorize by generation, etc.
     """
+    import dlt
     import json
     import requests
     from dlt_snowpark import DltSnowparkLoader
@@ -632,7 +638,7 @@ def main(session):
         else:
             return "Small"
 
-    @loader.resource(name="pokemon_enriched", write_disposition="replace")
+    @dlt.resource(name="pokemon_enriched", write_disposition="replace")
     def get_enriched_pokemon():
         """Yields Pokemon with additional computed fields (add_map pattern)"""
         enriched = []

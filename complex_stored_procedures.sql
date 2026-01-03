@@ -55,6 +55,7 @@ def load_ecommerce_data(session):
     
     Total: ~17,000+ rows across 5 tables
     """
+    import dlt
     import json
     import random
     import hashlib
@@ -224,23 +225,23 @@ def load_ecommerce_data(session):
         products[-1]["review_count"] = num_reviews
     
     # Define dlt resources
-    @loader.resource(name="ecom_categories", write_disposition="replace")
+    @dlt.resource(name="ecom_categories", write_disposition="replace")
     def categories_resource():
         yield CATEGORIES
     
-    @loader.resource(name="ecom_products", write_disposition="replace")
+    @dlt.resource(name="ecom_products", write_disposition="replace")
     def products_resource():
         yield products
     
-    @loader.resource(name="ecom_pricing_history", write_disposition="replace")
+    @dlt.resource(name="ecom_pricing_history", write_disposition="replace")
     def pricing_resource():
         yield pricing_history
     
-    @loader.resource(name="ecom_inventory", write_disposition="replace")
+    @dlt.resource(name="ecom_inventory", write_disposition="replace")
     def inventory_resource():
         yield inventory_records
     
-    @loader.resource(name="ecom_reviews", write_disposition="replace")
+    @dlt.resource(name="ecom_reviews", write_disposition="replace")
     def reviews_resource():
         yield reviews
     
@@ -303,6 +304,7 @@ def load_trading_data(session):
     
     Total: ~5,700+ rows across 4 tables
     """
+    import dlt
     import json
     import random
     import math
@@ -477,19 +479,19 @@ def load_trading_data(session):
         risk_metrics.append(risk)
     
     # Define resources
-    @loader.resource(name="fin_trades", write_disposition="replace")
+    @dlt.resource(name="fin_trades", write_disposition="replace")
     def trades_resource():
         yield trades
     
-    @loader.resource(name="fin_portfolio_snapshots", write_disposition="replace")
+    @dlt.resource(name="fin_portfolio_snapshots", write_disposition="replace")
     def snapshots_resource():
         yield portfolio_snapshots
     
-    @loader.resource(name="fin_market_data", write_disposition="replace")
+    @dlt.resource(name="fin_market_data", write_disposition="replace")
     def market_resource():
         yield market_data
     
-    @loader.resource(name="fin_risk_metrics", write_disposition="replace")
+    @dlt.resource(name="fin_risk_metrics", write_disposition="replace")
     def risk_resource():
         yield risk_metrics
     
@@ -549,6 +551,7 @@ def load_iot_data(session):
     
     Total: ~5,500+ rows across 4 tables
     """
+    import dlt
     import json
     import random
     import math
@@ -718,19 +721,19 @@ def load_iot_data(session):
             hourly_aggregations.append(aggregation)
     
     # Resources
-    @loader.resource(name="iot_devices", write_disposition="replace")
+    @dlt.resource(name="iot_devices", write_disposition="replace")
     def devices_resource():
         yield devices
     
-    @loader.resource(name="iot_readings", write_disposition="replace")
+    @dlt.resource(name="iot_readings", write_disposition="replace")
     def readings_resource():
         yield readings
     
-    @loader.resource(name="iot_alerts", write_disposition="replace")
+    @dlt.resource(name="iot_alerts", write_disposition="replace")
     def alerts_resource():
         yield alerts
     
-    @loader.resource(name="iot_hourly_agg", write_disposition="replace")
+    @dlt.resource(name="iot_hourly_agg", write_disposition="replace")
     def aggregations_resource():
         yield hourly_aggregations
     
@@ -1016,19 +1019,19 @@ def run_multi_source_etl(session):
         customer_360.append(unified)
     
     # Define resources
-    @loader.resource(name="src_crm_customers", write_disposition="replace")
+    @dlt.resource(name="src_crm_customers", write_disposition="replace")
     def crm_resource():
         yield crm_customers
     
-    @loader.resource(name="src_erp_orders", write_disposition="replace")
+    @dlt.resource(name="src_erp_orders", write_disposition="replace")
     def erp_resource():
         yield erp_orders
     
-    @loader.resource(name="src_web_events", write_disposition="replace")
+    @dlt.resource(name="src_web_events", write_disposition="replace")
     def web_resource():
         yield web_events
     
-    @loader.resource(name="unified_customer_360", write_disposition="replace")
+    @dlt.resource(name="unified_customer_360", write_disposition="replace")
     def customer_360_resource():
         yield customer_360
     
@@ -1099,6 +1102,7 @@ def run_dq_pipeline(session):
     - QUARANTINE: Records failing validation (with reasons)
     - VALIDATION_RESULTS: Full validation audit trail
     """
+    import dlt
     import json
     import random
     import re
@@ -1331,19 +1335,19 @@ def run_dq_pipeline(session):
             quarantine_records.append(quarantine_record)
     
     # Resources
-    @loader.resource(name="dq_source_data", write_disposition="replace")
+    @dlt.resource(name="dq_source_data", write_disposition="replace")
     def source_resource():
         yield source_data
     
-    @loader.resource(name="dq_validation_results", write_disposition="replace")
+    @dlt.resource(name="dq_validation_results", write_disposition="replace")
     def validation_resource():
         yield validation_results
     
-    @loader.resource(name="dq_clean_data", write_disposition="replace")
+    @dlt.resource(name="dq_clean_data", write_disposition="replace")
     def clean_resource():
         yield clean_records
     
-    @loader.resource(name="dq_quarantine", write_disposition="replace")
+    @dlt.resource(name="dq_quarantine", write_disposition="replace")
     def quarantine_resource():
         yield quarantine_records
     
@@ -1420,6 +1424,7 @@ def build_ecommerce_analytics(session):
     
     This demonstrates full ETL within Snowflake using DltSnowparkLoader.
     """
+    import dlt
     import json
     from datetime import datetime
     from dlt_snowpark import DltSnowparkLoader
@@ -1527,15 +1532,15 @@ def build_ecommerce_analytics(session):
     })
     
     # Step 5: Write using dlt
-    @loader.resource(name="ecom_product_performance", write_disposition="replace")
+    @dlt.resource(name="ecom_product_performance", write_disposition="replace")
     def product_perf_resource():
         yield product_performance_data
     
-    @loader.resource(name="ecom_category_summary", write_disposition="replace")
+    @dlt.resource(name="ecom_category_summary", write_disposition="replace")
     def category_resource():
         yield category_summary_data
     
-    @loader.resource(name="ecom_inventory_status", write_disposition="replace")
+    @dlt.resource(name="ecom_inventory_status", write_disposition="replace")
     def inventory_resource():
         yield inventory_status_data
     

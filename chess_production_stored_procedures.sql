@@ -50,6 +50,7 @@ def main(session, title: str, max_players: int):
         title: Player title (GM, IM, FM, etc.)
         max_players: Maximum number of players to fetch
     """
+    import dlt
     import json
     import requests
     from dlt_snowpark import DltSnowparkLoader
@@ -63,7 +64,7 @@ def main(session, title: str, max_players: int):
     response.raise_for_status()
     players_data = response.json()["players"][:max_players]
     
-    @loader.resource(name="players", write_disposition="replace")
+    @dlt.resource(name="players", write_disposition="replace")
     def get_players():
         """Yields player usernames with metadata"""
         processed = []
@@ -115,6 +116,7 @@ def main(session, title: str, max_players: int):
     
     Equivalent to: players | players_profiles (parallelized=True)
     """
+    import dlt
     import json
     import requests
     from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -154,7 +156,7 @@ def main(session, title: str, max_players: int):
             except Exception:
                 pass
     
-    @loader.resource(name="players_profiles", write_disposition="replace")
+    @dlt.resource(name="players_profiles", write_disposition="replace")
     def get_profiles():
         """Yields flattened player profiles"""
         flattened = []
@@ -227,6 +229,7 @@ def main(session, title: str, max_players: int, year: int, month: int):
         year: Year for games
         month: Month for games (1-12)
     """
+    import dlt
     import json
     import requests
     from dlt_snowpark import DltSnowparkLoader
@@ -280,7 +283,7 @@ def main(session, title: str, max_players: int, year: int, month: int):
             if exc.response.status_code != 404:
                 raise
     
-    @loader.resource(name="players_games", write_disposition="replace")
+    @dlt.resource(name="players_games", write_disposition="replace")
     def get_games():
         yield all_games if all_games else [{"no_games": True, "note": "No games found for the specified criteria"}]
     
@@ -334,6 +337,7 @@ def main(session, title: str, max_players: int, year: int, month: int):
     
     Where players_profiles and players_games are transformers that depend on players.
     """
+    import dlt
     import json
     import requests
     from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -388,7 +392,7 @@ def main(session, title: str, max_players: int, year: int, month: int):
     # ============================================================
     # Resource 1: Players
     # ============================================================
-    @loader.resource(name="players", write_disposition="replace")
+    @dlt.resource(name="players", write_disposition="replace")
     def get_players():
         processed = []
         for idx, username in enumerate(players_list):
@@ -402,7 +406,7 @@ def main(session, title: str, max_players: int, year: int, month: int):
     # ============================================================
     # Resource 2: Players Profiles
     # ============================================================
-    @loader.resource(name="players_profiles", write_disposition="replace")
+    @dlt.resource(name="players_profiles", write_disposition="replace")
     def get_profiles():
         flattened = []
         for profile in profiles_list:
@@ -429,7 +433,7 @@ def main(session, title: str, max_players: int, year: int, month: int):
     # ============================================================
     # Resource 3: Players Games
     # ============================================================
-    @loader.resource(name="players_games", write_disposition="replace")
+    @dlt.resource(name="players_games", write_disposition="replace")
     def get_games():
         if not all_games:
             yield [{"no_games": True}]
@@ -555,7 +559,7 @@ def main(session, max_players_per_title: int):
             all_data[title] = {"players": [], "profiles": []}
     
     # Create resources
-    @loader.resource(name="titled_players", write_disposition="replace")
+    @dlt.resource(name="titled_players", write_disposition="replace")
     def get_all_players():
         all_players = []
         for title, data in all_data.items():
@@ -568,7 +572,7 @@ def main(session, max_players_per_title: int):
                 })
         yield all_players
     
-    @loader.resource(name="titled_profiles", write_disposition="replace")
+    @dlt.resource(name="titled_profiles", write_disposition="replace")
     def get_all_profiles():
         all_profiles = []
         for title, data in all_data.items():
@@ -638,6 +642,7 @@ def main(session, title: str, max_players: int):
     Fetches player statistics including ratings across different time controls.
     Uses the /player/{username}/stats endpoint.
     """
+    import dlt
     import json
     import requests
     from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -671,7 +676,7 @@ def main(session, title: str, max_players: int):
             if result:
                 stats_list.append(result)
     
-    @loader.resource(name="player_stats", write_disposition="replace")
+    @dlt.resource(name="player_stats", write_disposition="replace")
     def get_stats():
         flattened = []
         for stats in stats_list:

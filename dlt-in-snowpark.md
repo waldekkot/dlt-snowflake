@@ -99,11 +99,12 @@ IMPORTS = ('@DLT_SNOWPARK_SFRT.DLT_SNOWPARK.MODULES/dlt_snowpark.py')
 AS
 $$
 def main(session):
+    import dlt
     from dlt_snowpark import DltSnowparkLoader
     
     loader = DltSnowparkLoader(session, pipeline_name="my_pipeline")
     
-    @loader.resource(name="my_table", write_disposition="replace")
+    @dlt.resource(name="my_table", write_disposition="replace")
     def get_data():
         yield [
             {"id": 1, "name": "Item 1"},
@@ -477,11 +478,12 @@ pipeline = dlt.pipeline(
 Use dlt's custom destination API with Snowpark's `save_as_table()`:
 
 ```python
+import dlt
 from dlt_snowpark import DltSnowparkLoader
 
 loader = DltSnowparkLoader(session, pipeline_name="test_pipeline")
 
-@loader.resource(name="my_table", write_disposition="replace")
+@dlt.resource(name="my_table", write_disposition="replace")
 def my_data():
     yield [{"id": 1}]
 
@@ -514,10 +516,11 @@ loader = DltSnowparkLoader(
 
 | Method | Description |
 |--------|-------------|
-| `loader.resource(name, write_disposition, **kwargs)` | Decorator to create a dlt resource |
 | `loader.run(*resources)` | Run pipeline, returns dict with status, tables, errors |
 | `loader.run_json(*resources)` | Run pipeline, returns formatted JSON string |
 | `loader.verify_table(name, limit=5)` | Query table to verify data |
+
+> **Note:** Use `@dlt.resource()` decorator directly from dlt (requires `import dlt`).
 
 #### Properties
 
@@ -554,11 +557,12 @@ loader = DltSnowparkLoader(
 
 ```python
 def my_procedure(session):
+    import dlt
     from dlt_snowpark import DltSnowparkLoader
     
     loader = DltSnowparkLoader(session)
     
-    @loader.resource(name="users", write_disposition="replace")
+    @dlt.resource(name="users", write_disposition="replace")
     def get_users():
         yield [{"id": 1, "name": "Alice"}]
     
@@ -569,15 +573,16 @@ def my_procedure(session):
 
 ```python
 def load_all(session):
+    import dlt
     from dlt_snowpark import DltSnowparkLoader
     
     loader = DltSnowparkLoader(session, pipeline_name="multi_table")
     
-    @loader.resource(name="customers", write_disposition="replace")
+    @dlt.resource(name="customers", write_disposition="replace")
     def customers():
         yield [{"id": 1, "name": "Acme Corp"}]
     
-    @loader.resource(name="orders", write_disposition="replace")
+    @dlt.resource(name="orders", write_disposition="replace")
     def orders():
         yield [{"order_id": 100, "customer_id": 1}]
     
@@ -588,12 +593,13 @@ def load_all(session):
 
 ```python
 def fetch_github_issues(session):
+    import dlt
     from dlt_snowpark import DltSnowparkLoader
     from dlt.sources.helpers.rest_client import paginate
     
     loader = DltSnowparkLoader(session)
     
-    @loader.resource(name="issues", write_disposition="replace")
+    @dlt.resource(name="issues", write_disposition="replace")
     def get_issues():
         for page in paginate(
             "https://api.github.com/repos/dlt-hub/dlt/issues",
@@ -608,8 +614,9 @@ def fetch_github_issues(session):
 
 ```python
 def build_analytics(session):
-    from dlt_snowpark import DltSnowparkLoader
+    import dlt
     import json
+    from dlt_snowpark import DltSnowparkLoader
     
     loader = DltSnowparkLoader(session, pipeline_name="analytics")
     db, schema = loader.database, loader.schema
@@ -623,7 +630,7 @@ def build_analytics(session):
     data = [row.as_dict() for row in analytics_df.collect()]
     
     # Write using dlt
-    @loader.resource(name="customer_analytics", write_disposition="replace")
+    @dlt.resource(name="customer_analytics", write_disposition="replace")
     def customer_analytics():
         yield data
     
