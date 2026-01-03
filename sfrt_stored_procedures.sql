@@ -17,6 +17,7 @@ COMMENT = 'Test dlt with Snowflake destination in stored procedure'
 AS
 $$
 def test_dlt(snowpark_session):
+    import dlt
     from dlt_snowpark import DltSnowparkLoader
     import json
 
@@ -32,7 +33,7 @@ def test_dlt(snowpark_session):
         loader = DltSnowparkLoader(snowpark_session, pipeline_name="test_pipeline")
 
         # Create a simple dlt resource
-        @loader.resource(name="test_table", write_disposition="replace")
+        @dlt.resource(name="test_table", write_disposition="replace")
         def test_resource():
             yield test_data
 
